@@ -1,0 +1,42 @@
+{
+  "report": {
+    "traj/precision": 0.9781771501925546,
+    "traj/recall": 0.983225806451613,
+    "traj/f1": 0.9806949806949807,
+    "step_f1/benign": 0.987088950709751,
+    "step_f1/injection_point": 0.9351969504447268,
+    "step_f1/hijacked": 0.982456140350877,
+    "step_f1/failed_injection": 0.9161290322580645,
+    "step_f1/macro": 0.9552177684408548,
+    "injection_em": 0.8838709677419355,
+    "hijack_iou": 0.964494623655914,
+    "flag_rate/attacked": 0.983225806451613,
+    "flag_rate/benign": 0.0038095238095238095,
+    "flag_rate/failed_attack": 0.01834862385321101,
+    "flag_rate/hard_negative": 0.05392156862745098,
+    "recall/delayed_execution": 0.905982905982906,
+    "recall/full_hijack": 1.0,
+    "recall/partial_hijack": 0.9903846153846154,
+    "prevent/blocked_before_execution": 0.9891737891737892,
+    "prevent/first_hijack_caught": 0.9806451612903225,
+    "prevent/benign_interruption": 0.01795142555438226,
+    "conformal/benign_hold_or_block": 0.005279831045406547,
+    "conformal/benign_block": 0.0,
+    "conformal/attack_caught": 0.9754838709677419,
+    "conformal/attack_blocked": 0.8916129032258064
+  },
+  "ci": {
+    "traj/f1": [
+      0.9737255249394863,
+      0.9872258809540142
+    ],
+    "step_f1/macro": [
+      0.9473112569888753,
+      0.9625911905561518
+    ],
+    "hijack_iou": [
+      0.9524575106595654,
+      0.9750631313995608
+    ]
+  }
+}
