@@ -1,0 +1,54 @@
+[project]
+name = "tracewarden"
+version = "0.1.0.dev0"
+description = "Pre-dispatch detection and localization of indirect prompt injection in AI-agent tool calls"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Your Name", email = "you@example.com" }]
+keywords = ["prompt-injection", "llm-agents", "security", "mcp", "guardrails"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Security",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.24",
+  "torch>=2.1",
+  "scikit-learn>=1.3",
+]
+
+[project.optional-dependencies]
+st = ["sentence-transformers>=2.7"]
+app = ["gradio>=4.0"]
+onnx = ["onnx", "onnxruntime"]
+mcp = ["mcp>=1.0"]
+dev = ["pytest>=7", "ruff>=0.4", "matplotlib", "pandas", "pyarrow", "huggingface_hub"]
+all = ["tracewarden[st,app,onnx,mcp,dev]"]
+
+[project.scripts]
+tracewarden = "tracewarden.cli:main"
+tracewarden-mcp = "tracewarden.integrations.mcp_proxy:main"
+
+[project.urls]
+Homepage = "https://github.com/<you>/tracewarden"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tracewarden"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501", "B905", "E741", "UP031"]  # B/I/H/F label constants are intentional
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

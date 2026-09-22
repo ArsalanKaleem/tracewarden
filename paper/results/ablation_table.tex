@@ -1,0 +1,11 @@
+% Baseline numbers: hashing encoder, anonymized AgentDrift task-disjoint test, threshold 0.5, single seed.
+% Replace with all-mpnet-base-v2 results and 3-seed means from scripts/run_ablation.py.
+\begin{table}[t]\centering\small
+\begin{tabular}{lcccccc}\toprule
+Model & Decides & Traj F1 & Step F1 & Inj.\ EM & Hij.\ IoU & Benign int. \\\midrule
+DriftNet (re-impl.) & post-hoc & 0.982 & 0.988 & 0.974 & 0.959 & -- \\
+StreamGuard, text only & pre-dispatch & 0.949 & 0.910 & 0.814 & 0.932 & 4.6\% \\
+StreamGuard, all features & pre-dispatch & 0.977 & 0.953 & 0.888 & 0.966 & 2.3\% \\\bottomrule
+\end{tabular}
+\caption{In-distribution results (baseline encoder).}
+\end{table}

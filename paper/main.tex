@@ -1,0 +1,49 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs,graphicx,hyperref,amsmath}
+\title{From Synthetic to Real: Pre-Dispatch Detection and Localization of Indirect Prompt Injection in Agent Tool Calls}
+\author{<Your Name>}
+\date{}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% 1 problem, 2 gap (post-hoc, synthetic, single injection), 3 what we do, 4 headline transfer finding, 5 artifacts.
+\end{abstract}
+
+\section{Introduction}
+% RQ1 transfer, RQ2 prevention, RQ3 features, RQ4 robustness, RQ5 operations. Contributions list = N1-N10.
+
+\section{Related Work}
+% Indirect prompt injection; AgentDojo; AgentDrift and DriftNet; StepJack; CaMeL and data-flow defenses; MCP security.
+
+\section{Problem Formulation}
+% Event-level pre-dispatch task: ACTION_i / OBS_i; hijack targets at actions, poison targets at observations.
+% Multi-injection label grammar (B+ I+ H+ ...).
+
+\section{Method}
+\subsection{StreamGuard}
+\subsection{Argument provenance and goal anchoring}
+\subsection{Conformal allow/hold/block policy}
+
+\section{Data}
+\subsection{AgentDrift and its shortcuts}
+% Table: world-identity lookup 85.9% overall (93-98% in 4 domains) -> 55.5% after anonymization.
+\subsection{AgentDojo-Steps}
+% generation, auto-labeling rule, hand audit agreement, two model families, multi-step and multilingual subsets.
+
+\section{Experiments}
+\subsection{In-distribution and ablations}
+\input{results/ablation_table.tex}
+\subsection{Synthetic-to-real transfer}
+\subsection{How much real data closes the gap}
+\subsection{Robustness: multi-step, multilingual, obfuscated, adaptive}
+\subsection{Cost on a laptop CPU}
+
+\section{Limitations}
+\section{Ethics}
+% Sandboxed fictional environments only; attacker goals reused from AgentDojo; no operational attack recipes.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+\end{document}

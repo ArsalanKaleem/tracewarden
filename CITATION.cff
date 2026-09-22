@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use TraceWarden, please cite it as below."
+title: "TraceWarden: Pre-dispatch detection of indirect prompt injection in agent tool calls"
+authors:
+  - family-names: "<Family>"
+    given-names: "<Given>"
+version: 0.1.0
+date-released: 2026-10-17
+license: MIT
+repository-code: "https://github.com/<you>/tracewarden"
