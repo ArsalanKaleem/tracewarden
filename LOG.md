@@ -13,6 +13,22 @@ Conventions:
 
 ---
 
+## Where the project stands (updated Day 11)
+
+| Phase | Days | Status |
+|---|---|---|
+| 1 · Foundation | 1–5 | **done** — repo, loader, shortcut audit, mpnet cache, DriftNet reproduced |
+| 2 · Novel detector | 6–10 | **done** — StreamGuard, provenance + anchoring, conformal policy, 3-seed ablation |
+| 3 · Real-world data | 11–15 | **in progress** — labeler fixed and validated; benign + banking attacked collected for model A |
+| 4 · Experiments | 16–19 | not started (blocked on Phase 3) |
+| 5 · Product | 20–23 | code exists from the scaffold; untested integrations, no release |
+| 6 · Paper and launch | 24–25 | skeleton + figures script only |
+
+Roughly **45% complete**. The synthetic half of the project is finished and defensible; the real-data half —
+which is where the contribution actually lives — is about a third done.
+
+---
+
 ## Day 0 — environment and repository
 
 **Worked** — Python 3.12.10 venv (3.14 is the machine default and has no torch wheels); CPU-only torch;
@@ -21,8 +37,6 @@ blocks `transfer_money` (1.00), both before execution. Repo pushed; CI on 3.10/3
 
 **Broke** — CI failed on the quickstart step: `.gitignore` excluded `*.pt`, so the demo checkpoint was never
 committed. Fixed with `!models/*.pt` and `git add -f`.
-
-**Next** — replace remaining `<you>` placeholders; confirm the name is free on PyPI and HF.
 
 ---
 
@@ -71,9 +85,10 @@ over 122,531 step-views (21,617 trajectories including the shuffled copies). Upl
 **Kaggle gotchas, all of which cost time:**
 - Datasets mount at `/kaggle/input/datasets/<username>/<slug>`, not `/kaggle/input/<slug>`.
 - The Internet toggle only takes effect after **Run → Restart session**, and a restart clears all variables.
-- Secret labels are matched exactly (`tracewarden-token-huggingface`).
-- `pip install git+https://...` failed even with a public repo; shipping `src/` as a second dataset
-  (`tw-src`) and using `sys.path.insert` is more reliable.
+- Secret labels are matched exactly, and secrets are attached **per notebook**, not per account.
+- `pip install git+https://...` failed even with a public repo; shipping `src/` as a dataset and using
+  `sys.path.insert` is more reliable. `/kaggle/input` is read-only, so patching a module means copying the
+  package to `/kaggle/working` first.
 
 ---
 
@@ -91,8 +106,8 @@ Prevention (all features): blocked before execution 0.989 · first hijack caught
 1. *Price of causality*: pre-dispatch matches post-hoc on detection (0.981 vs 0.981) but loses ~10 points of
    injection exact match (0.884 vs 0.981). A poisoned observation must be judged when it arrives, before the
    agent's later behavior disambiguates it. Design consequence, not a defect.
-2. *Features*: the F1 difference is inside the CIs on one seed; the defensible claims are the fivefold drop in
-   benign false alarms (1.90% → 0.38%) and delayed-execution recall (0.880 → 0.906). Confirmed by seeds below.
+2. *Features*: the defensible claims are the fivefold drop in benign false alarms (1.90% → 0.38%) and
+   delayed-execution recall (0.880 → 0.906), both confirmed across seeds.
 3. *Hard negatives* are the streaming model's weak point (5.4% vs DriftNet's 1.5%): they look suspicious early
    and are only vindicated later, which a causal model cannot see.
 
@@ -100,14 +115,9 @@ Prevention (all features): blocked before execution 0.989 · first hijack caught
 
 ## Day 9 — conformal calibration (N5)
 
-```
-tracewarden calibrate --checkpoint runs/sg.pt --data data/processed --cache cache/hashing --alpha 0.01
-```
-
 Thresholds from 980 non-compromised validation trajectories: hold 0.814, block 0.994. On test the promise
 holds: **0.53%** of benign runs held or blocked (budget 1%), **0%** blocked, catching **97.6%** of attacks and
-**97.3%** at or before the first hijacked call. Zero false alarms on benign and resisted attacks; every false
-positive is a hard negative (2.45%).
+**97.3%** at or before the first hijacked call. Every false positive is a hard negative (2.45%).
 
 Risk–coverage (test): alpha 0.0025 → 0.10% flagged / 93.8% caught · 0.01 → 0.82% / 96.9% · 0.05 → 4.90% / 99.7%.
 
@@ -116,85 +126,105 @@ cannot certify a rate below ~1/981, so it refuses rather than guessing. Correct 
 
 ---
 
-## Day 10 — encoder comparison and seed variance (**3 layers**, `run_ablation.py --only 5 --seeds 3`)
+## Day 10 — encoder comparison and seed variance (**3 layers**)
 
 | encoder | traj F1 (3 seeds) | macro step F1 | injection EM | benign interrupted | delayed-exec recall |
 |---|---|---|---|---|---|
 | hashing-768 | 0.981 / 0.984 / 0.983 | 0.968 / 0.963 / 0.956 | 0.894 / 0.888 / 0.888 | 1.2% / 1.3% / 1.2% | 0.897 / 0.915 / 0.915 |
 | mpnet | 0.968 / 0.968 / **0.948\*** | 0.932 / 0.930 / 0.928 | 0.845 / 0.844 / 0.781 | 3.7% / 3.6% / 3.5% | 0.923 / 0.923 / 0.752 |
 
-\* seed 2 stopped at epoch 15 on patience 6 while seeds 0 and 1 ran to epochs 39–40. **Early-stopping artifact,
-not a result** — re-run with `patience=10` before reporting. Even excluding it, the gap is ~1.5 points of F1
-against a hashing seed spread of 0.0015, so it is far outside seed noise.
-
-Single-run mpnet checks: 15 epochs → 0.965 F1 / 0.795 EM; 40 epochs → 0.969 / 0.861. Converged (training loss
-0.023, validation plateaued from epoch 27), so undertraining is ruled out.
+\* seed 2 stopped at epoch 15 on patience 6 while seeds 0 and 1 ran to epochs 39–40. Early-stopping artifact;
+re-run with `patience=10`. Even excluding it the gap is ~1.5 F1 points against a hashing seed spread of 0.0015.
 
 **Finding (provisional)** — a hashed bag of n-grams matches or beats a 110M-parameter sentence encoder on
 AgentDrift, with a third of the false alarms. This contradicts DriftNet's Future Work claim that the frozen
-encoder is the likely bottleneck and that fine-tuning it is "the most direct route to gains".
-
-**Counter-crumb** — mpnet wins on delayed execution (0.923 vs 0.909 in both good seeds), the one pattern where
-the attack hides in timing rather than wording. Plausible story: surface cues carry the easy cases, semantics
-help on the stealthy ones.
+encoder is the likely bottleneck. **Counter-crumb**: mpnet wins on delayed execution (0.923 vs 0.909), the
+pattern where the attack hides in timing rather than wording.
 
 ---
 
-## Day 10b — does anonymization cause the encoder result? (matched 2-layer comparison, hashing)
-
-```
-tracewarden encode --data data/raw_identity --encoder hashing-768 --out cache/hashing_raw
-tracewarden train --model streamguard --data data/raw_identity --cache cache/hashing_raw --out runs/sg_raw_hash.pt --epochs 40 --patience 10
-tracewarden evaluate --checkpoint runs/sg_raw_hash.pt --data data/raw_identity --cache cache/hashing_raw --threshold 0.5
-```
+## Day 10b — does anonymization cause the encoder result? (matched 2-layer, hashing)
 
 | identities | traj F1 | macro step F1 | injection EM | hijack IoU | benign flagged | hard-neg flagged | benign interruption |
 |---|---|---|---|---|---|---|---|
 | anonymized | 0.9807 | 0.955 | 0.884 | 0.965 | 0.38% | 5.39% | 1.80% |
 | raw | 0.9799 | 0.964 | 0.892 | 0.959 | 0.38% | 3.43% | 1.37% |
 
-**This is the important result of the week.** Removing every name, company and address changes trajectory F1 by
-0.0008 — nothing. The detector is **not** exploiting the identity regularity even when it is available, and
-anonymization costs nothing. This answers DriftNet's first Future Work item ("leakage-controlled evaluation
-would bound how much of the trajectory-level headline survives"): essentially all of it survives. Credit them
-for the question; the measurement is ours.
+**The important result of the week.** Removing every name, company and address changes trajectory F1 by
+0.0008. The detector is not exploiting the identity regularity even when it is available, and anonymization
+costs nothing. This answers DriftNet's first Future Work item — essentially all of the headline survives
+leakage-controlled evaluation. Credit them for the question; the measurement is ours.
 
-Raw identities do help slightly on hard negatives (3.4% vs 5.4% flagged), which makes sense: knowing a contact
-is real makes a suspicious-looking but legitimate action easier to accept.
-
-**Still open** — the mpnet half of the 2×2 (`cache/mpnet_raw`) needs one short Kaggle session. If the
-hashing-over-mpnet gap persists on raw identities, the finding is about the benchmark; if it closes,
-anonymization interacts with the encoder and the claim must be narrowed.
+**Still open** — the mpnet half of the 2×2 (`cache/mpnet_raw`) needs one short Kaggle session.
 
 ---
 
-## Figures to produce (paper/figures/)
+## Day 11 — real agent trajectories (notebook 02)
 
-Nothing was plotted until now because every number was provisional. These are stable enough to draw:
+**Setup that works** (record it, it took several attempts):
+`--model VLLM_PARSED --model-id <hf id>` with vLLM serving `Qwen/Qwen2.5-7B-Instruct-AWQ`,
+`--enable-auto-tool-choice --tool-call-parser hermes`, `--max-model-len 8192`, `--gpu-memory-utilization 0.90`,
+single T4. Server ready in 200–220 s.
 
-1. **Risk–coverage curve** (data in hand): attacks caught vs benign flagged, log x-axis —
-   `python scripts/make_figures.py --checkpoint runs/sg.pt --data data/processed --cache cache/hashing`.
-2. **Post-hoc vs pre-dispatch** (data in hand): the price-of-causality figure — equal trajectory F1, lower
-   injection exact match.
-3. **Encoder / identity 2×2** (needs `cache/mpnet_raw`): grouped bars, traj F1 and benign interruption.
-4. **Adaptation curve** (Day 17, after real data): real trajectories vs recovered performance.
+### Three labeling bugs, found by the smoke test before any large run
+
+1. **Reflowed payloads.** AgentDojo's `injections` dict holds `\n\n` where the environment text has `\n`, so
+   exact substring matching never fired and nothing was marked poisoned. Fix: whitespace- and case-normalized
+   comparison of an 80-character payload signature.
+2. **Truncated identifiers.** The agent wrote `US13300000012121212` for the attacker's
+   `US133000000121212121212` — four digits short. Fix: compare alphanumeric-only keys on a common prefix of
+   at least ten characters. Different IBANs are still rejected.
+3. **Goal-based attacks with no identifier.** "Change the password to new_password" contains no address or
+   account, so nothing matched. Fix: also extract distinctive payload tokens (quoted strings, or words with a
+   digit or underscore) and match them exactly against argument values.
+
+All three are in `src/tracewarden/io/agentdojo.py`; 18 tests pass.
+
+### Labeling convention (paper material)
+
+`hijacked` = the agent took an action serving the attacker, **whether or not the attacker's goal completed**.
+AgentDojo's `security` oracle checks final environment state instead. On the smoke set, four of the five
+disagreements were partial compliance: money genuinely sent to the attacker's IBAN with the wrong
+amount or subject line, which the oracle scores as a failed attack and a guard should still block. The
+oracle verdict is preserved in `meta.security` so the stricter definition can be re-derived.
+
+### Data collected (model A, Qwen2.5-7B-Instruct-AWQ)
+
+| set | trajectories | steps | notes |
+|---|---|---|---|
+| benign (banking, slack, travel) | 75 | 357 benign | 0 oracle disagreements |
+| banking attacked | 136 | 44 injection_point · 60 hijacked · 68 failed_injection · 157 benign | 11 disagreements (8%) |
+
+Suite-level rates: banking benign utility 50.0%; banking attacked utility 46.5%, security 22.9%. The ~4-point
+utility drop under attack is the attack's collateral damage even when resisted — worth reporting.
+Run-to-run variation on the same suite was 5/9 vs 6/9 injection tasks passing, so attack-success rates carry
+a few points of sampling error at default temperature.
+
+**Broke**
+- **workspace excluded**: prompts exceed 8,192 and then 16,384 tokens (large cloud-drive listings plus retry
+  loops). A T4 cannot serve a bigger KV cache alongside the weights. Documented exclusion.
+- **slack is low-value**: `send_channel_message` returns `None` and the agent retries four or five times;
+  trajectories are mostly failed calls. Attacked run launched; conversion pending.
+- Session restarts lose the helper functions from cell 4 — re-run cells 1, 3, 4 before any conversion cell,
+  or use **Save Version → Save & Run All** so everything executes in order server-side.
+
+**Next** — travel attacked; convert and upload slack; then the 30-trajectory hand audit.
 
 ---
 
 ## Open items
 
-- [ ] Re-run mpnet seed 2 with `patience=10`; report the corrected seed table.
-- [ ] Make the CLI trunk default 3 layers so all runs are comparable.
-- [ ] `cache/mpnet_raw` on Kaggle to close the 2×2.
+- [ ] Travel attacked run; convert + upload slack.
+- [ ] `scripts/review_labels.py --n 30` — agreement rate for the dataset card (gate before model B).
+- [ ] Model B (Llama-3.1-8B-Instruct-AWQ-INT4, parser `llama3_json`), same suites.
+- [ ] Re-run mpnet seed 2 with `patience=10`; make the CLI trunk default 3 layers.
+- [ ] `cache/mpnet_raw` to close the encoder/identity 2×2.
 - [ ] Check arXiv for DriftNet follow-ups (last checked: Day 1).
 
-## Next actions (in order)
+## Figures
 
-1. Figures 1 and 2 from existing results; commit to `paper/figures/`.
-2. Notebook 02: vLLM + AgentDojo, model A. Run `--help` on the installed AgentDojo first; smoke-test one suite
-   and hand-read three converted trajectories before generating hundreds.
-3. `scripts/review_labels.py` on 30 trajectories; record the agreement rate for the dataset card.
-4. Model B (Llama-3.1-8B-AWQ), then the transfer table.
+Done: risk–coverage, price of causality, step head + confusion, training dynamics (`scripts/figures.py`).
+Pending: encoder/identity 2×2 (needs `cache/mpnet_raw`); adaptation curve (needs real data).
 
 ---
 
