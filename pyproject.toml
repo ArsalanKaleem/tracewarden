@@ -32,7 +32,7 @@ tracewarden = "tracewarden.cli:main"
 tracewarden-mcp = "tracewarden.integrations.mcp_proxy:main"
 
 [project.urls]
-Homepage = "https://github.com/<you>/tracewarden"
+Homepage = "https://github.com/ArsalanKaleem/tracewarden"
 
 [build-system]
 requires = ["hatchling"]
