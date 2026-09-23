@@ -215,7 +215,7 @@ def main(argv=None) -> None:
     s.add_argument("--epochs", type=int, default=40)
     s.add_argument("--batch-size", type=int, default=32)
     s.add_argument("--lr", type=float, default=3e-4)
-    s.add_argument("--layers", type=int, default=2)
+    s.add_argument("--layers", type=int, default=3)
     s.add_argument("--patience", type=int, default=6)
     s.add_argument("--seed", type=int, default=42)
     s.add_argument("--limit", type=int, default=0)
