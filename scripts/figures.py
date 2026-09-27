@@ -91,12 +91,16 @@ def fig_dynamics(a) -> None:
     ax1.axvline(best, color=GREY, ls="--", lw=0.9)
     ax1.text(best, ax1.get_ylim()[1] * 0.97, " selected epoch", color=GREY, fontsize=7,
              rotation=90, va="top", ha="left")
-    ax1.set_xlabel("epoch"); ax1.set_ylabel("loss"); ax1.legend()
+    ax1.set_xlabel("epoch")
+    ax1.set_ylabel("loss")
+    ax1.legend()
     panel(ax1, "a", "Joint loss, selected configuration")
 
     ax2.plot(ep, [h["val_f1"] for h in hist], color=BLUE, label="trajectory F1")
     ax2.axvline(best, color=GREY, ls="--", lw=0.9)
-    ax2.set_xlabel("epoch"); ax2.set_ylabel("validation F1"); ax2.legend(loc="lower right")
+    ax2.set_xlabel("epoch")
+    ax2.set_ylabel("validation F1")
+    ax2.legend(loc="lower right")
     panel(ax2, "b", "Validation F1")
     save(fig, Path(a.out), a.name or "fig_dynamics")
 
@@ -118,7 +122,9 @@ def fig_causality(a) -> None:
         vals = [src.get(k, np.nan) for k, _ in CAUSAL_METRICS]
         bars = ax1.bar(x + (i - 0.5) * w, vals, w, label=name, color=col, edgecolor="white", linewidth=0.6)
         ax1.bar_label(bars, fmt="%.3f", fontsize=6.6, padding=1.5)
-    ax1.set_xticks(x, labels); ax1.set_ylim(0.75, 1.02); ax1.set_ylabel("score")
+    ax1.set_xticks(x, labels)
+    ax1.set_ylim(0.75, 1.02)
+    ax1.set_ylabel("score")
     ax1.legend(loc="lower left", ncols=1)
     ax1.grid(axis="x", visible=False)
     panel(ax1, "a", "Detection holds, localization pays")
@@ -130,7 +136,8 @@ def fig_causality(a) -> None:
     cols = [GREEN, GREEN, PINK]
     bars = ax2.bar([lab for _, lab in keys], vals, 0.55, color=cols, edgecolor="white", linewidth=0.6)
     ax2.bar_label(bars, fmt="%.3f", fontsize=6.8, padding=2)
-    ax2.set_ylim(0, 1.08); ax2.set_ylabel("rate")
+    ax2.set_ylim(0, 1.08)
+    ax2.set_ylabel("rate")
     ax2.grid(axis="x", visible=False)
     panel(ax2, "b", "What only a pre-dispatch guard can report")
     save(fig, Path(a.out), a.name or "fig_causality")
@@ -167,7 +174,8 @@ def fig_coverage(a) -> None:
             ax1.annotate(f"  α={r['alpha']:g}", (r["benign_flag"], r["attack_catch"]),
                          fontsize=7, color=GREY, va="center")
     ax1.set_xscale("log")
-    ax1.set_xlabel("benign trajectories flagged"); ax1.set_ylabel("attacks caught")
+    ax1.set_xlabel("benign trajectories flagged")
+    ax1.set_ylabel("attacks caught")
     panel(ax1, "a", "Risk–coverage")
 
     cats = ["benign", "hard_negative", "failed_attack", "attacked"]
@@ -179,7 +187,8 @@ def fig_coverage(a) -> None:
     ax2.bar_label(bars, fmt="%.3f", fontsize=6.8, padding=2)
     ax2.axhline(th.get("alpha_hold", 0.01), color=GREY, ls="--", lw=0.9)
     ax2.text(len(cats) - 0.4, th.get("alpha_hold", 0.01), " budget", fontsize=7, color=GREY, va="bottom")
-    ax2.set_ylabel("flag rate"); ax2.set_ylim(0, 1.08)
+    ax2.set_ylabel("flag rate")
+    ax2.set_ylim(0, 1.08)
     ax2.grid(axis="x", visible=False)
     panel(ax2, "b", "Flag rate per true category")
     save(fig, Path(a.out), a.name or "fig_coverage")
@@ -190,16 +199,20 @@ def fig_steps(a) -> None:
     from tracewarden.schema import LABELS
 
     s, _ = _score(a)
-    g = np.concatenate(s["gold"]); p = np.concatenate(s["pred"])
-    keep = g >= 0; g, p = g[keep], p[keep]
+    g = np.concatenate(s["gold"])
+    p = np.concatenate(s["pred"])
+    keep = g >= 0
+    g, p = g[keep], p[keep]
     short = ["benign", "injection\npoint", "hijacked", "failed\ninjection"]
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.4, 2.9), gridspec_kw={"width_ratios": [1.25, 1]})
-    x = np.arange(len(LABELS)); w = 0.26
+    x = np.arange(len(LABELS))
+    w = 0.26
     for j, (metric, shade) in enumerate([("precision", 0.45), ("recall", 0.72), ("F1", 1.0)]):
         vals = []
         for k in range(len(LABELS)):
-            tp = int(((p == k) & (g == k)).sum()); fp = int(((p == k) & (g != k)).sum())
+            tp = int(((p == k) & (g == k)).sum())
+            fp = int(((p == k) & (g != k)).sum())
             fn = int(((p != k) & (g == k)).sum())
             pr = tp / (tp + fp) if tp + fp else 0.0
             rc = tp / (tp + fn) if tp + fn else 0.0
@@ -208,7 +221,9 @@ def fig_steps(a) -> None:
         cols = [_shade(SERIES[k], shade) for k in range(len(LABELS))]
         ax1.bar(x + (j - 1) * w, v, w, color=cols, edgecolor="white", linewidth=0.5,
                 label=metric if j >= 0 else None)
-    ax1.set_xticks(x, short); ax1.set_ylim(78, 101.5); ax1.set_ylabel("score (%)")
+    ax1.set_xticks(x, short)
+    ax1.set_ylim(78, 101.5)
+    ax1.set_ylabel("score (%)")
     ax1.grid(axis="x", visible=False)
     handles = [plt.Rectangle((0, 0), 1, 1, color=_shade(GREY, s_)) for s_ in (0.45, 0.72, 1.0)]
     ax1.legend(handles, ["precision", "recall", "F1"], loc="lower center", ncols=3,
@@ -227,7 +242,8 @@ def fig_steps(a) -> None:
                          color="white" if cm[i, j] > 55 else "#1d2433")
     ax2.set_xticks(range(len(LABELS)), short, fontsize=7)
     ax2.set_yticks(range(len(LABELS)), short, fontsize=7)
-    ax2.set_xlabel("predicted"); ax2.set_ylabel("gold")
+    ax2.set_xlabel("predicted")
+    ax2.set_ylabel("gold")
     ax2.grid(visible=False)
     panel(ax2, "b", "Step confusion (row-normalised, %)")
     save(fig, Path(a.out), a.name or "fig_steps")
@@ -238,7 +254,60 @@ def _shade(hexcol: str, f: float) -> tuple:
     return tuple(1 - f * (1 - c))
 
 
-# ------------------------------------------------------------------ 5. encoders / seeds
+# ------------------------------------------------------------------ 5. synthetic-to-real transfer
+TRANSFER_METRICS = [("traj/f1", "traj F1"), ("step_f1/macro", "step F1"),
+                    ("injection_em", "inj. EM"), ("prevent/first_hijack_caught", "1st hijack")]
+
+
+def fig_transfer(a) -> None:
+    """Grouped bars per test set, one group of bars per encoder run."""
+    runs = {}
+    for spec in a.runs:
+        name, path = spec.split("=", 1)
+        runs[name] = {r["eval"]: r for r in _load(path)}
+    sets = list(next(iter(runs.values())).keys())
+    x = np.arange(len(TRANSFER_METRICS))
+    fig, axes = plt.subplots(1, len(sets), figsize=(2.5 * len(sets) + 0.6, 2.9), sharey=True)
+    axes = np.atleast_1d(axes)
+    w = 0.8 / max(len(runs), 1)
+    for ax, sname, letter in zip(axes, sets, "abcdef"):
+        for i, (rname, rows) in enumerate(runs.items()):
+            r = rows.get(sname, {})
+            vals = [r.get(k, np.nan) for k, _ in TRANSFER_METRICS]
+            ax.bar(x + (i - (len(runs) - 1) / 2) * w, vals, w, label=rname, color=SERIES[i % 4],
+                   edgecolor="white", linewidth=0.5)
+        ax.set_xticks(x, [lab for _, lab in TRANSFER_METRICS], fontsize=7.5, rotation=30, ha="right")
+        ax.set_ylim(0, 1.05)
+        ax.grid(axis="x", visible=False)
+        panel(ax, letter, sname)
+    axes[0].set_ylabel("score")
+    axes[-1].legend(loc="upper right")
+    save(fig, Path(a.out), a.name or "fig_transfer")
+
+
+# ------------------------------------------------------------------ 6. matched-budget comparison
+def fig_budget(a) -> None:
+    """Risk-coverage on the SAME data for several checkpoints: who catches more at equal false alarms."""
+    from tracewarden.calibrate import risk_coverage
+
+    alphas = [0.0025, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+    fig, ax = plt.subplots(figsize=(4.4, 3.1))
+    for i, spec in enumerate(a.runs):
+        name, ckpt, data, cache, split = spec.split(":")
+        ns = argparse.Namespace(checkpoint=ckpt, data=data, cache=cache, split=split)
+        s, _ = _score(ns)
+        rc = risk_coverage(s["traj_score"], s["y"], alphas=alphas)
+        ax.plot([r["benign_flag"] for r in rc], [r["attack_catch"] for r in rc], marker="o", ms=4,
+                color=SERIES[i % 4], label=name)
+    ax.set_xscale("log")
+    ax.set_xlabel("benign trajectories flagged")
+    ax.set_ylabel("attacks caught")
+    ax.legend(loc="upper left")
+    panel(ax, "a", a.title or "Real agent traffic")
+    save(fig, Path(a.out), a.name or "fig_budget")
+
+
+# ------------------------------------------------------------------ 7. encoders / seeds
 ENC_METRICS = [("traj/f1", "trajectory F1"), ("injection_em", "injection exact match"),
                ("prevent/benign_interruption", "benign runs interrupted")]
 
@@ -250,7 +319,7 @@ def fig_encoders(a) -> None:
         runs[name] = _load(path)
     fig, axes = plt.subplots(1, len(ENC_METRICS), figsize=(7.4, 2.7))
     for ax, (key, title), letter in zip(axes, ENC_METRICS, "abcdef"):
-        for i, (name, rows) in enumerate(runs.items()):
+        for i, (_name, rows) in enumerate(runs.items()):
             vals = [r[key] for r in rows if key in r]
             ax.scatter([i] * len(vals), vals, s=26, color=SERIES[i % 4], zorder=3)
             if vals:
@@ -276,15 +345,41 @@ def main() -> None:
             p.add_argument("--cache", required=True)
             p.add_argument("--split", default="test")
 
-    p = sub.add_parser("dynamics"); p.add_argument("--history", required=True); common(p)
+    p = sub.add_parser("dynamics")
+    p.add_argument("--history", required=True)
+    common(p)
     p.set_defaults(fn=fig_dynamics)
-    p = sub.add_parser("causality"); p.add_argument("--posthoc", required=True)
-    p.add_argument("--pre", required=True); common(p); p.set_defaults(fn=fig_causality)
-    p = sub.add_parser("coverage"); common(p, True); p.set_defaults(fn=fig_coverage)
-    p = sub.add_parser("steps"); common(p, True); p.set_defaults(fn=fig_steps)
-    p = sub.add_parser("encoders"); p.add_argument("--runs", nargs="+", required=True,
-                                                   help="name=path/to/ablation.json ...")
-    common(p); p.set_defaults(fn=fig_encoders)
+
+    p = sub.add_parser("causality")
+    p.add_argument("--posthoc", required=True)
+    p.add_argument("--pre", required=True)
+    common(p)
+    p.set_defaults(fn=fig_causality)
+
+    p = sub.add_parser("coverage")
+    common(p, True)
+    p.set_defaults(fn=fig_coverage)
+
+    p = sub.add_parser("steps")
+    common(p, True)
+    p.set_defaults(fn=fig_steps)
+
+    p = sub.add_parser("transfer")
+    p.add_argument("--runs", nargs="+", required=True, help="name=paper/results/transfer.json ...")
+    common(p)
+    p.set_defaults(fn=fig_transfer)
+
+    p = sub.add_parser("budget")
+    p.add_argument("--runs", nargs="+", required=True,
+                   help="name:checkpoint:data_folder:cache_folder:split ...")
+    p.add_argument("--title", default=None)
+    common(p)
+    p.set_defaults(fn=fig_budget)
+
+    p = sub.add_parser("encoders")
+    p.add_argument("--runs", nargs="+", required=True, help="name=path/to/ablation.json ...")
+    common(p)
+    p.set_defaults(fn=fig_encoders)
 
     a = ap.parse_args()
     a.fn(a)
