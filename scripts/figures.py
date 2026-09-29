@@ -285,6 +285,26 @@ def fig_transfer(a) -> None:
     save(fig, Path(a.out), a.name or "fig_transfer")
 
 
+# ------------------------------------------------------------------ 5b. adaptation curve
+def fig_adaptation(a) -> None:
+    rows = _load(a.adaptation)
+    ks = sorted({r["k"] for r in rows})
+    fig, ax = plt.subplots(figsize=(4.4, 3.0))
+    for j, (key, label, col) in enumerate([("traj_f1", "trajectory F1", BLUE),
+                                           ("first_hijack_caught", "first hijack caught", ORANGE)]):
+        mean = [float(np.mean([r[key] for r in rows if r["k"] == k])) for k in ks]
+        lo = [float(np.min([r[key] for r in rows if r["k"] == k])) for k in ks]
+        hi = [float(np.max([r[key] for r in rows if r["k"] == k])) for k in ks]
+        ax.plot(ks, mean, marker="o", ms=4, color=col, label=label, zorder=3 - j)
+        ax.fill_between(ks, lo, hi, color=col, alpha=0.15, linewidth=0)
+    ax.set_xlabel("real labeled trajectories used for adaptation")
+    ax.set_ylabel("score on held-out real test")
+    ax.set_ylim(0, 1.0)
+    ax.legend(loc="upper left")
+    panel(ax, "a", "Adaptation with real data")
+    save(fig, Path(a.out), a.name or "fig_adaptation")
+
+
 # ------------------------------------------------------------------ 6. matched-budget comparison
 def fig_budget(a) -> None:
     """Risk-coverage on the SAME data for several checkpoints: who catches more at equal false alarms."""
@@ -363,6 +383,11 @@ def main() -> None:
     p = sub.add_parser("steps")
     common(p, True)
     p.set_defaults(fn=fig_steps)
+
+    p = sub.add_parser("adaptation")
+    p.add_argument("--adaptation", required=True, help="paper/results/adaptation.json")
+    common(p)
+    p.set_defaults(fn=fig_adaptation)
 
     p = sub.add_parser("transfer")
     p.add_argument("--runs", nargs="+", required=True, help="name=paper/results/transfer.json ...")
