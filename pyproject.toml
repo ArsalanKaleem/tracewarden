@@ -1,12 +1,13 @@
 [project]
 name = "tracewarden"
 version = "0.1.0.dev0"
-description = "Pre-dispatch detection and localization of indirect prompt injection in AI-agent tool calls"
+description = "Pre-dispatch detection and localization of indirect prompt injection in LLM agent tool calls"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Your Name", email = "you@example.com" }]
-keywords = ["prompt-injection", "llm-agents", "security", "mcp", "guardrails"]
+authors = [{ name = "Arsalan Kaleem", email = "arsalanabbasi.here@gmail.com" }]
+keywords = ["prompt-injection", "llm-agents", "ai-security", "agent-security", "tool-use",
+            "guardrails", "conformal-prediction", "agentdojo", "mcp"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: MIT License",
@@ -33,6 +34,7 @@ tracewarden-mcp = "tracewarden.integrations.mcp_proxy:main"
 
 [project.urls]
 Homepage = "https://github.com/ArsalanKaleem/tracewarden"
+Issues = "https://github.com/ArsalanKaleem/tracewarden/issues"
 
 [build-system]
 requires = ["hatchling"]
