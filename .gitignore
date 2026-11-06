@@ -21,3 +21,7 @@ kaggle_upload/
 # local paper sources
 paper/
 check.py
+# multi-seed study outputs (scripts/multiseed.py) and the Kaggle upload bundle
+cache_seeds/
+results/
+kaggle/*.zip
